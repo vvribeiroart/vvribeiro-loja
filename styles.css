@@ -643,11 +643,9 @@ input:disabled+.slider {
     opacity: 0.8;
     max-width: 800px;
     margin: 0 auto;
-    text-align: left;
+    text-align: center;
     line-height: 1.8;
     font-family: 'Outfit', 'Helvetica', sans-serif;
-    /* Modern, rounded font available in Google Fonts link */
-    font-style: italic;
     font-weight: 300;
 }
 
@@ -665,50 +663,75 @@ input:disabled+.slider {
 
 .category-card {
     display: block;
+    position: relative;
     text-decoration: none;
     color: var(--text-primary);
-    transition: transform 0.3s ease;
-    background: transparent;
-    border: 1px solid var(--border);
-    padding: 1rem;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Liquid glass subtle edge */
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .category-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--text-primary);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .card-image-wrapper {
     width: 100%;
-    aspect-ratio: 1;
-    /* Match aspect ratio */
+    aspect-ratio: 16/9;
+    /* Cinematic ratio for the background */
     overflow: hidden;
-    margin-bottom: 1.5rem;
+    position: relative;
     background: var(--bg-dark);
-    /* Placeholder color */
+}
+
+.card-image-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 100%);
+    pointer-events: none;
 }
 
 .card-image-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    /* Don't crop to ensure proper aspect ratio display */
+    object-fit: cover;
     display: block;
-    transition: transform 0.5s ease;
+    transition: transform 0.7s ease, opacity 0.7s ease;
+    opacity: 0.6;
+    /* Lowered opacity for the background effect */
 }
 
 .category-card:hover .card-image-wrapper img {
-    transform: scale(1.05);
+    transform: scale(1.08);
+    opacity: 0.4;
 }
 
 .category-card h2 {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    letter-spacing: 3px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-body);
+    /* Rounder font */
+    font-weight: 500;
+    font-size: 2rem;
+    letter-spacing: 2px;
     text-transform: uppercase;
     text-align: center;
     margin: 0;
-    padding: 1rem 0;
+    width: 100%;
+    z-index: 2;
+    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.8);
 }
 
 @media (max-width: 768px) {
