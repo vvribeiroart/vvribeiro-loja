@@ -107,14 +107,30 @@ document.addEventListener('DOMContentLoaded', () => {
             state: document.getElementById('regState').value.trim().toUpperCase()
         };
 
-        // Success! Save customer details locally to bypass the register screen later
-        // We deliberately DO NOT save the password to localStorage for security
-        const safePayload = { ...customerPayload };
-        delete safePayload.password;
+        // Hook into the mock database
+        const usersDB = JSON.parse(localStorage.getItem('usersDB') || '[]');
 
-        localStorage.setItem('registeredUser', JSON.stringify(safePayload));
+        // Prevent duplicate email registration
+        if (usersDB.find(u => u.email === customerPayload.email)) {
+            alert('Esse e-mail já está cadastrado. Por favor, faça login.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+        }
 
-        // Redirect smoothly back to the cart to finalize the Mercado Pago checkout
-        window.location.href = 'cart.html';
+        // Save user to the database
+        usersDB.push(customerPayload);
+        localStorage.setItem('usersDB', JSON.stringify(usersDB));
+
+        // Auto-login the user into the active session
+        const sessionPayload = { ...customerPayload };
+        delete sessionPayload.password; // Do not keep password in the active session scope
+        localStorage.setItem('activeUser', JSON.stringify(sessionPayload));
+
+        // Display success popup per user requirement
+        alert('Cadastro realizado com sucesso!');
+
+        // Redirect to gallery menu
+        window.location.href = 'gallery.html';
     });
 });

@@ -171,6 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
             updateGrandTotal(subtotal, currentShippingCost);
 
+            // Activate the checkout button now that shipping is verified
+            const checkoutCompleteBtn = document.getElementById('checkoutCompleteBtn');
+            checkoutCompleteBtn.disabled = false;
+            checkoutCompleteBtn.style.opacity = '1';
+            checkoutCompleteBtn.style.cursor = 'pointer';
+
         } catch (error) {
             shippingMessage.textContent = 'Não foi possível calcular o frete para este CEP.';
             shippingMessage.className = 'shipping-msg error';
@@ -187,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCart();
 
     // Auto-calculate shipping for returning registered users
-    const storedUser = localStorage.getItem('registeredUser');
+    const storedUser = localStorage.getItem('activeUser');
     if (storedUser && cart.length > 0) {
         try {
             const userParams = JSON.parse(storedUser);
@@ -212,13 +218,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Enhanced Mercado Pago / Serverless Checkout Redirect
     const checkoutCompleteBtn = document.getElementById('checkoutCompleteBtn');
+
+    // Lock checkout initially until shipping calculates
+    checkoutCompleteBtn.disabled = true;
+    checkoutCompleteBtn.style.opacity = '0.5';
+    checkoutCompleteBtn.style.cursor = 'not-allowed';
+
     checkoutCompleteBtn.addEventListener('click', async () => {
         if (cart.length === 0) return;
 
-        // CHECK LOGIN STATE: If no registered user exists in localStorage, divert to Registration Flow
-        const storedUser = localStorage.getItem('registeredUser');
+        // CHECK LOGIN STATE: If no registered user exists in localStorage, divert to Authentication Flow
+        const storedUser = localStorage.getItem('activeUser');
         if (!storedUser) {
-            window.location.href = 'register.html';
+            window.location.href = 'login.html';
             return;
         }
 
