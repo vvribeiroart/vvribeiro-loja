@@ -285,7 +285,8 @@ nav a:hover {
 }
 
 .passepartout.active {
-    padding: 2.5cqi;
+    padding: 1.5cqi;
+    /* Reduced thickness */
 }
 
 .artwork-image {
