@@ -948,3 +948,58 @@ input:disabled+.slider {
     padding: 1rem;
     font-size: 1rem;
 }
+
+/* =========================================
+   Mobile Optimization (Sales Page)
+   ========================================= */
+
+@media (max-width: 1024px) {
+
+    /* Stack the art preview and the checkout panel on top of each other */
+    .product-container {
+        grid-template-columns: 1fr;
+        padding: 2rem;
+        gap: 3rem;
+    }
+
+    /* Force the checkout configuration options to occupy half-rows instead of 4-across */
+    .options-grid.frames {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* Give the mockup image more edge-to-edge breathing room on small phones */
+    .product-container {
+        padding: 1rem;
+    }
+
+    /* Make the configuration glass panel full-width and reduce internal padding */
+    .glass-panel {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    /* Stack frame buttons vertically to avoid text overflow */
+    .options-grid.frames,
+    .options-grid.sizes {
+        grid-template-columns: 1fr;
+    }
+
+    /* Shrink the primary checkout price display slightly */
+    .total-price {
+        font-size: 2rem;
+    }
+
+    /* Center the checkout button and move it to a block layout */
+    .checkout-footer {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .btn-checkout {
+        width: 100%;
+    }
+}
