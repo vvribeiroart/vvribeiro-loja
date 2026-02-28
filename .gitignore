@@ -1,0 +1,20 @@
+# Ignore Node.js dependencies
+node_modules/
+.npm-cache/
+
+# Ignore Environment Variables (CRITICAL FOR SECURITY)
+.env
+.env.local
+
+# Ignore macOS generated files
+.DS_Store
+
+# Ignore Vercel CLI cache
+.vercel/
+
+# Ignore local server logs and PIDs
+server.pid
+server_error*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

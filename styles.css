@@ -1,0 +1,927 @@
+:root {
+    /* Color Palette */
+    --bg-dark: #000000;
+    --text-primary: #E3E3E3;
+    --text-secondary: #c6c6c6;
+    --accent: #5a5a5a;
+    --accent-glow: rgba(90, 90, 90, 0.4);
+    --surface: rgba(255, 255, 255, 0.05);
+    /* Slight lightening for pure black contrast */
+    --surface-hover: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.15);
+
+    /* Frame Colors */
+    --color-frame-black: #1a1a1a;
+    --color-frame-wood: #8b5a2b;
+    --color-frame-white: #f5f5f5;
+
+    /* Typography */
+    --font-heading: 'Helvetica', 'Arial', sans-serif;
+    --font-body: 'Helvetica', 'Arial', sans-serif;
+    --font-serif: 'Georgia', serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Background Effects Removed to match minimalist site */
+.background-effects {
+    display: none;
+}
+
+/* Header */
+.main-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem 4rem;
+    position: relative;
+    z-index: 10;
+}
+
+.logo {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 5px;
+    /* Matched to brand spacing */
+    text-transform: uppercase;
+}
+
+.logo span {
+    color: var(--text-primary);
+}
+
+nav {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--text-primary);
+}
+
+.btn-primary {
+    background: transparent;
+    border: 1px solid var(--text-primary);
+    padding: 0.6rem 1.5rem;
+    border-radius: 0;
+    /* Boxy buttons to match minimalist catalog */
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: var(--text-primary);
+    color: var(--bg-dark);
+}
+
+/* Layout */
+.product-container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 4rem;
+    padding: 2rem 4rem 4rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Preview Section */
+.preview-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.image-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+}
+
+.mockup-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    container-type: inline-size;
+}
+
+.mockup-bg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.mockup-art-area {
+    position: absolute;
+    top: 33%;
+    /* Center vertically higher on the wall above the cozy couch */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 
+ * 270cm Horizontal Wall Space
+ * A4 (long edge 30cm) = 30 / 270 = 11.11%
+ * A3 (long edge 40cm) = 40 / 270 = 14.81%
+ * A2 (long edge 60cm) = 60 / 270 = 22.22%
+ * A1 (long edge 85cm) = 85 / 270 = 31.48%
+ */
+.mockup-size-a4 .artwork-image {
+    max-width: 11.11cqi;
+    max-height: 11.11cqi;
+}
+
+.mockup-size-a3 .artwork-image {
+    max-width: 14.81cqi;
+    max-height: 14.81cqi;
+}
+
+.mockup-size-a2 .artwork-image {
+    max-width: 22.22cqi;
+    max-height: 22.22cqi;
+}
+
+.mockup-size-a1 .artwork-image {
+    max-width: 31.48cqi;
+    max-height: 31.48cqi;
+}
+
+/* Dynamic Frame System */
+.frame-container {
+    position: relative;
+    /* Extremely soft, diffuse warm shadow to blend into the room's ambient lighting */
+    box-shadow: 0 40px 80px -15px rgba(25, 20, 15, 0.5), 0 15px 35px -5px rgba(25, 20, 15, 0.25);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background-color: transparent;
+    border: 0px solid transparent;
+    box-sizing: content-box;
+    display: inline-block;
+    /* Frames wrap around the image perfectly without squishing it inwardly */
+}
+
+.frame-container.framed {
+    --frame-width: 8px;
+    /* Default */
+    border-width: var(--frame-width);
+    border-style: solid;
+}
+
+.mockup-size-a4 .frame-container.framed {
+    --frame-width: 4px;
+}
+
+.mockup-size-a3 .frame-container.framed {
+    --frame-width: 7px;
+}
+
+.mockup-size-a2 .frame-container.framed {
+    --frame-width: 10px;
+}
+
+.mockup-size-a1 .frame-container.framed {
+    --frame-width: 14px;
+}
+
+/* Light reaction overlay and darkening layer */
+.frame-container.framed::before,
+.frame-container.framed::after {
+    content: '';
+    position: absolute;
+    top: calc(var(--frame-width) * -1);
+    left: calc(var(--frame-width) * -1);
+    right: calc(var(--frame-width) * -1);
+    bottom: calc(var(--frame-width) * -1);
+    pointer-events: none;
+}
+
+.frame-container.framed::before {
+    background: rgba(0, 0, 0, 0.25);
+    /* Reduces the brightness of the frames */
+    z-index: 10;
+}
+
+/* Make the white frame significantly brighter but not completely blown out */
+.frame-container.frame-white.framed::before {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.frame-container.framed::after {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.25) 100%);
+    z-index: 11;
+    mix-blend-mode: soft-light;
+}
+
+/* Photorealistic Frame Upgrades */
+.frame-container.frame-black {
+    border-color: #000000;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 25px 45px -10px rgba(0, 0, 0, 0.4);
+}
+
+.frame-container.frame-wood {
+    border-color: transparent;
+    border-image: url('images/frame-natural-wood.png') 120 stretch;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.7), 0 25px 45px -10px rgba(0, 0, 0, 0.4);
+}
+
+.frame-container.frame-white {
+    border-color: transparent;
+    border-image: url('images/frame-white-wood.png') 120 repeat;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2), 0 25px 45px -10px rgba(0, 0, 0, 0.3);
+}
+
+.passepartout {
+    position: relative;
+    z-index: 20;
+    /* Ensures the art sits above the frame darkening overlay */
+    padding: 0;
+    transition: all 0.5s ease;
+    background-color: #fcfcfc;
+    /* Textured off-white mat board */
+    display: block;
+    box-sizing: content-box;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -1px -1px 3px rgba(255, 255, 255, 0.8);
+}
+
+.passepartout.active {
+    padding: 2.5cqi;
+}
+
+.artwork-image {
+    display: block;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.5s ease;
+    width: auto;
+    height: auto;
+}
+
+/* Gallery Thumbnails */
+.gallery-thumbnails {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.thumbnail {
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    width: 80px;
+    height: 80px;
+    transition: all 0.3s;
+    opacity: 0.5;
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail:hover {
+    opacity: 0.8;
+}
+
+.thumbnail.active {
+    opacity: 1;
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* Customizer Section */
+.glass-panel {
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.product-info h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.product-info .artist {
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.product-info .description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.customizer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.control-group>label {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+/* Radio Cards */
+.options-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.options-grid.sizes {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.options-grid.frames {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.radio-card {
+    position: relative;
+    cursor: pointer;
+    display: block;
+}
+
+.radio-card input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    /* Boxy aesthetic */
+    transition: all 0.3s ease;
+    text-align: center;
+    height: 100%;
+}
+
+.options-grid.sizes .card-content {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.radio-card:hover .card-content {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.radio-card input:checked~.card-content {
+    background: var(--accent);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.card-content .title {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.card-content .subtitle {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Frame Swatches */
+.frame-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+    border: 2px solid transparent;
+}
+
+.frame-swatch.none {
+    border: 2px dashed var(--text-secondary);
+}
+
+.frame-swatch.black {
+    background: #000000;
+}
+
+.frame-swatch.wood {
+    background: var(--color-frame-wood);
+}
+
+.frame-swatch.white {
+    background: var(--color-frame-white);
+}
+
+.radio-card input:checked~.card-content .frame-swatch {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px var(--bg-dark), 0 0 0 4px #fff;
+}
+
+/* Toggle Switch */
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: transparent;
+    border-radius: 0;
+    border: 1px solid var(--border);
+}
+
+.toggle-group label,
+.toggle-group .subtitle {
+    margin: 0;
+    display: block;
+}
+
+.toggle-group .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--surface-hover);
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--text-secondary);
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: var(--accent);
+}
+
+input:checked+.slider:before {
+    transform: translateX(22px);
+    background-color: white;
+}
+
+input:disabled+.slider {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.slider.round {
+    border-radius: 0;
+    /* Blocky toggle */
+}
+
+.slider.round:before {
+    border-radius: 0;
+}
+
+/* Checkout Footer */
+.checkout-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.total-price {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.price-details {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.btn-checkout {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--text-primary);
+    padding: 1rem 2rem;
+    border-radius: 0;
+    /* Matches brand blocky buttons */
+    font-family: var(--font-heading);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-checkout:hover {
+    background: var(--text-primary);
+    color: var(--bg-dark);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .product-container {
+        grid-template-columns: 1fr;
+    }
+
+    .image-wrapper {
+        height: 400px;
+    }
+}
+
+/* Gallery CSS Additions */
+
+.gallery-container {
+    padding: 60px 2rem 4rem;
+    /* Reduced top padding from 120px to move content up */
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+}
+
+.gallery-header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.gallery-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.gallery-bio {
+    font-size: 1.125rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+    line-height: 1.8;
+    font-family: 'Outfit', 'Helvetica', sans-serif;
+    /* Modern, rounded font available in Google Fonts link */
+    font-style: italic;
+    font-weight: 300;
+}
+
+.gallery-bio p {
+    margin-bottom: 2rem;
+}
+
+.category-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+    /* Reduced margin from 4rem to move buttons up */
+}
+
+.category-card {
+    display: block;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: transform 0.3s ease;
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 1rem;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--text-primary);
+}
+
+.card-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    /* Match aspect ratio */
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    background: var(--bg-dark);
+    /* Placeholder color */
+}
+
+.card-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Don't crop to ensure proper aspect ratio display */
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.category-card:hover .card-image-wrapper img {
+    transform: scale(1.05);
+}
+
+.category-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0;
+    padding: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .category-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+.photo-grid {
+    column-count: 3;
+    column-gap: 2rem;
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .photo-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 600px) {
+    .photo-grid {
+        column-count: 1;
+    }
+}
+
+.photo-card {
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: block;
+    /* Removed flex */
+    break-inside: avoid;
+    /* Essential for masonry */
+    margin-bottom: 2rem;
+    /* Creates vertical spacing since row-gap doesn't apply */
+    background: transparent;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.photo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+}
+
+.photo-card:hover .photo-img-wrapper img {
+    /* removed scale to keep complete image uncropped */
+    opacity: 1;
+}
+
+.photo-img-wrapper {
+    width: 100%;
+    /* remove fixed height so ratio is preserved */
+    position: relative;
+    background: transparent;
+}
+
+.photo-img-wrapper img {
+    width: 100%;
+    height: auto;
+    /* Allow natural height */
+    object-fit: contain;
+    /* Don't crop */
+    display: block;
+    /* Remove small bottom gap */
+    transition: opacity 0.3s ease;
+    opacity: 0.9;
+}
+
+.photo-info {
+    display: none;
+    /* Hide empty titles section since user requested no titles */
+}
+
+.photo-info p {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.back-to-gallery-link {
+    display: inline-block;
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: opacity 0.3s ease;
+}
+
+.back-to-gallery-link:hover {
+    opacity: 0.8;
+
+}
+
+/* Cart Icon & Badge in Header */
+.cart-icon-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.3s;
+    margin-left: 2rem;
+}
+
+.cart-icon-wrapper:hover {
+    color: var(--text-secondary);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: var(--text-primary);
+    color: var(--bg-dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+/* Add to Cart Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+}
+
+.modal-content {
+    background: var(--surface);
+    padding: 3rem;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-content h2 {
+    font-family: var(--font-heading);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.modal-content p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+
+
+.modal-actions button {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+}

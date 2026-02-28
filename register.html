@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Victor Ribeiro Arte</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Using inline component style since this is a specific page -->
+    <style>
+        .register-container {
+            padding: 60px 2rem 4rem;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-panel {
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .auth-panel h2 {
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .customer-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .shipping-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-family: var(--font-heading);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: var(--font-body);
+            transition: border-color 0.3s ease, background 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .full-width {
+            flex: 1;
+        }
+
+        .half-width {
+            flex: 1;
+        }
+
+        .third-width {
+            flex: 1;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+
+            .auth-panel {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated background layers -->
+    <div class="background-container">
+        <div class="bg-shape shape-1"></div>
+        <div class="bg-shape shape-2"></div>
+        <div class="noise-overlay"></div>
+    </div>
+
+    <header class="navbar">
+        <div class="nav-brand">Victor Ribeiro</div>
+        <nav class="nav-links">
+            <a href="index.html">Início</a>
+            <a href="gallery.html">Galeria</a>
+            <a href="cart.html" class="cart-icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="feather feather-shopping-cart">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-badge" style="display: none;">0</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="register-container">
+        <div class="cart-header">
+            <h1 class="gallery-title">Cadastro Seguro</h1>
+            <a href="cart.html" class="back-to-gallery-link">← Voltar ao Carrinho</a>
+        </div>
+
+        <p class="gallery-bio" style="text-align: center;">Precisamos de algumas informações para enviar sua obra de
+            arte o mais rápido possível.</p>
+
+        <div class="auth-panel glass-panel">
+            <form id="registerForm" class="customer-form">
+
+                <h3 class="shipping-subtitle">Dados Pessoais</h3>
+
+                <div class="form-group">
+                    <label for="regName">Nome Completo</label>
+                    <input type="text" id="regName" placeholder="Ex: Victor Ribeiro" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="regEmail">E-mail</label>
+                        <input type="email" id="regEmail" placeholder="contato@exemplo.com" required>
+                    </div>
+                    <div class="form-group half-width">
+                        <label for="regPhone">WhatsApp / Telefone</label>
+                        <input type="tel" id="regPhone" placeholder="(00) 00000-0000" maxlength="15" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="regPassword">Crie uma Senha (Mínimo 8 caracteres, 1 número, 1 símbolo)</label>
+                        <input type="password" id="regPassword" placeholder="••••••••" required>
+                        <small id="passwordError" style="color: #ff6b6b; display: none; padding-top: 5px;"></small>
+                    </div>
+                </div>
+
+                <h3 class="shipping-subtitle" style="margin-top: 1.5rem;">Endereço de Entrega</h3>
+
+                <div class="form-group">
+                    <label for="regCep">CEP</label>
+                    <div class="cep-group" style="display: flex; gap: 10px;">
+                        <input type="text" id="regCep" placeholder="Ex: 01001-000" maxlength="9" required
+                            style="flex: 1;">
+                        <button type="button" id="regCalcCepBtn" class="btn-checkout"
+                            style="padding: 0 1.5rem; width: auto; font-size: 0.9rem;">Buscar</button>
+                    </div>
+                    <p id="regCepMessage" style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 5px;">
+                    </p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="regStreet">Rua / Avenida</label>
+                        <input type="text" id="regStreet" placeholder="Sua rua" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="regNumber">Número</label>
+                        <input type="text" id="regNumber" placeholder="Ex: 123" required>
+                    </div>
+                    <div class="form-group half-width">
+                        <label for="regComplement">Complemento</label>
+                        <input type="text" id="regComplement" placeholder="Apt, Casa (Opcional)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group third-width">
+                        <label for="regDistrict">Bairro</label>
+                        <input type="text" id="regDistrict" placeholder="Seu bairro" required>
+                    </div>
+                    <div class="form-group third-width">
+                        <label for="regCity">Cidade</label>
+                        <input type="text" id="regCity" placeholder="Sua cidade" required>
+                    </div>
+                    <div class="form-group third-width">
+                        <label for="regState">Estado</label>
+                        <input type="text" id="regState" placeholder="SP" maxlength="2" required>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" id="submitRegisterBtn" class="btn-checkout full-width"
+                        style="padding: 1.2rem; font-size: 1.1rem;">
+                        Criar Conta e Prosseguir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; <span id="year"></span> Victor Ribeiro Arte. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="cart-badge.js"></script>
+    <script src="register.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+
+</html>
