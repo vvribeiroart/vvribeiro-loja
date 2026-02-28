@@ -1,34 +1,37 @@
-// auth.js - Global Authentication Manager using localStorage
+// auth.js - Global Authentication Manager using Supabase
 
-const initAuth = () => {
-    // Ensure usersDB exists
-    if (!localStorage.getItem('usersDB')) {
-        localStorage.setItem('usersDB', JSON.stringify([]));
+// Get active session asynchronously
+const getActiveUser = async () => {
+    try {
+        const { data: { session }, error } = await window.supabase.auth.getSession();
+        if (error) throw error;
+        return session ? session.user : null;
+    } catch (error) {
+        console.error("Error fetching Supabase session:", error.message);
+        return null; // Return null if Supabase isn't configured yet or there's an error
     }
 };
 
-const getActiveUser = () => {
-    const user = localStorage.getItem('activeUser');
-    return user ? JSON.parse(user) : null;
-};
-
-const updateHeaderAuth = () => {
+const updateHeaderAuth = async () => {
     const authContainer = document.getElementById('auth-links-container');
     if (!authContainer) return;
 
-    const user = getActiveUser();
+    const user = await getActiveUser();
+
     if (user) {
-        // Assume user has a name property
-        const firstName = user.name ? user.name.split(' ')[0] : 'Usuário';
+        // Retrieve the user's name from their user metadata
+        const fullName = user.user_metadata?.name || 'Usuário';
+        const firstName = fullName.split(' ')[0];
+
         authContainer.innerHTML = `
             <span class="auth-greeting">Olá, ${firstName}</span>
             <span class="auth-separator">|</span>
             <a href="#" id="logout-btn" class="auth-link">Sair</a>
         `;
 
-        document.getElementById('logout-btn').addEventListener('click', (e) => {
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
             e.preventDefault();
-            localStorage.removeItem('activeUser');
+            await window.supabase.auth.signOut();
             window.location.reload();
         });
     } else {
@@ -42,6 +45,14 @@ const updateHeaderAuth = () => {
 
 // Initialize auth state and header on load
 document.addEventListener('DOMContentLoaded', () => {
-    initAuth();
     updateHeaderAuth();
+
+    // Listen for auth events (login, logout, token refresh)
+    if (window.supabase) {
+        window.supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+                updateHeaderAuth();
+            }
+        });
+    }
 });

@@ -192,20 +192,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial render
     renderCart();
 
-    // Auto-calculate shipping for returning registered users
-    const storedUser = localStorage.getItem('activeUser');
-    if (storedUser && cart.length > 0) {
-        try {
-            const userParams = JSON.parse(storedUser);
-            if (userParams.cep) {
-                cepInput.value = userParams.cep;
-                // Programmatically execute the freight fetch
-                calcShippingBtn.click();
+    // Auto-calculate shipping for returning registered users securely via Supabase Auth Network
+    window.supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session && cart.length > 0) {
+            try {
+                // Address data was embedded in the Postgres raw_user_meta_data blob during registry
+                const userParams = session.user.user_metadata;
+                if (userParams && userParams.cep) {
+                    cepInput.value = userParams.cep;
+                    // Programmatically execute the freight fetch
+                    calcShippingBtn.click();
+                }
+            } catch (e) {
+                console.error('Failed to restore user shipping data from network', e);
             }
-        } catch (e) {
-            console.error('Failed to restore user shipping data', e);
         }
-    }
+    });
 
     // CEP input formatter mask
     cepInput.addEventListener('input', function (e) {
@@ -227,14 +229,18 @@ document.addEventListener('DOMContentLoaded', () => {
     checkoutCompleteBtn.addEventListener('click', async () => {
         if (cart.length === 0) return;
 
-        // CHECK LOGIN STATE: If no registered user exists in localStorage, divert to Authentication Flow
-        const storedUser = localStorage.getItem('activeUser');
-        if (!storedUser) {
+        // CHECK LOGIN STATE securely via the cloud
+        const { data: { session } } = await window.supabase.auth.getSession();
+
+        if (!session) {
+            // User is anonymous or token expired, force them to re-authenticate
             window.location.href = 'login.html';
             return;
         }
 
-        const customerDetails = JSON.parse(storedUser);
+        // Extract shipping payload safely from the decoded JWT metadata
+        const customerDetails = session.user.user_metadata;
+        customerDetails.email = session.user.email; // Append email since it lives one level up on the object
 
         checkoutCompleteBtn.disabled = true;
         const originalText = checkoutCompleteBtn.textContent;

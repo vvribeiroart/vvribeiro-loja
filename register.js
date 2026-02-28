@@ -7,6 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const submitBtn = document.getElementById('submitRegisterBtn');
 
+    // Redirect if already logged in via Supabase
+    window.supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            window.location.href = 'gallery.html';
+        }
+    });
+
     // CEP input formatter mask
     cepInput.addEventListener('input', function (e) {
         let val = e.target.value.replace(/\D/g, '');
@@ -77,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Form Submission Override
+    // Form Submission Override using Supabase
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -91,13 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         submitBtn.disabled = true;
         const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Criando Conta...';
+        submitBtn.textContent = 'Autenticando na Nuvem...';
 
-        const customerPayload = {
+        const email = document.getElementById('regEmail').value.trim();
+
+        // Safe data to be embedded into the Supabase Postgres Auth table as raw metadata
+        const userMetaData = {
             name: document.getElementById('regName').value.trim(),
-            email: document.getElementById('regEmail').value.trim(),
             phone: document.getElementById('regPhone').value.trim(),
-            password: password,
             cep: document.getElementById('regCep').value.replace(/\D/g, ''),
             street: document.getElementById('regStreet').value.trim(),
             number: document.getElementById('regNumber').value.trim(),
@@ -107,30 +115,40 @@ document.addEventListener('DOMContentLoaded', () => {
             state: document.getElementById('regState').value.trim().toUpperCase()
         };
 
-        // Hook into the mock database
-        const usersDB = JSON.parse(localStorage.getItem('usersDB') || '[]');
+        try {
+            // Trigger Supabase Cloud Registration
+            const { data, error } = await window.supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: userMetaData // Supabase will automatically securely store this alongside the credentials
+                }
+            });
 
-        // Prevent duplicate email registration
-        if (usersDB.find(u => u.email === customerPayload.email)) {
-            alert('Esse e-mail já está cadastrado. Por favor, faça login.');
+            if (error) throw error;
+
+            // Alert user success
+            alert('Cadastro no Banco de Dados concluído! Você será redirecionado em instantes.');
+
+            // Redirect to gallery menu
+            window.location.href = 'gallery.html';
+
+        } catch (error) {
+            console.error('Registration error:', error);
+
+            // Provide human readable errors based on Supabase codes
+            let errMsg = 'Erro desconhecido ao cadastrar. Verifique a conexão.';
+            if (error.message.includes('User already registered')) {
+                errMsg = 'Este e-mail já está cadastrado no sistema. Faça login.';
+            } else if (error.status === 400 || error.message.includes('password')) {
+                errMsg = 'Senha muito fraca de acordo com as políticas do servidor.';
+            } else {
+                errMsg = error.message;
+            }
+
+            alert(errMsg);
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
-            return;
         }
-
-        // Save user to the database
-        usersDB.push(customerPayload);
-        localStorage.setItem('usersDB', JSON.stringify(usersDB));
-
-        // Auto-login the user into the active session
-        const sessionPayload = { ...customerPayload };
-        delete sessionPayload.password; // Do not keep password in the active session scope
-        localStorage.setItem('activeUser', JSON.stringify(sessionPayload));
-
-        // Display success popup per user requirement
-        alert('Cadastro realizado com sucesso!');
-
-        // Redirect to gallery menu
-        window.location.href = 'gallery.html';
     });
 });
