@@ -116,11 +116,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (!data.erro) {
-                    document.getElementById('addrStreet').value = data.logradouro || '';
+                    const streetInput = document.getElementById('addrStreet');
+                    streetInput.value = data.logradouro || '';
                     document.getElementById('addrCity').value = data.localidade || '';
                     document.getElementById('addrState').value = data.uf || '';
-                    // Set focus to the number input since street is filled
-                    if (data.logradouro) document.getElementById('addrNumber').focus();
+                    
+                    // Specific logic for generic city CEPs (no street returned)
+                    if (data.logradouro) {
+                        streetInput.setAttribute('readonly', true);
+                        streetInput.style.opacity = '0.7';
+                        document.getElementById('addrNumber').focus();
+                    } else {
+                        // Unlock street field so user can type it
+                        streetInput.removeAttribute('readonly');
+                        streetInput.style.opacity = '1';
+                        streetInput.focus();
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching CEP:', error);
