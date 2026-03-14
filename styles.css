@@ -163,29 +163,29 @@ nav a:hover {
 
 /* 
  * 270cm Horizontal Wall Space
- * A4 (long edge 30cm) = 30 / 270 = 11.11%
- * A3 (long edge 40cm) = 40 / 270 = 14.81%
- * A2 (long edge 60cm) = 60 / 270 = 22.22%
- * A1 (long edge 85cm) = 85 / 270 = 31.48%
+ * A4 (long edge 30cm) = 30 / 270 = 11.11% (-5% = 10.55%)
+ * A3 (long edge 40cm) = 40 / 270 = 14.81% (-5% = 14.07%)
+ * A2 (long edge 60cm) = 60 / 270 = 22.22% (-5% = 21.11%)
+ * A1 (long edge 85cm) = 85 / 270 = 31.48% (-5% = 29.91%)
  */
 .mockup-size-a4 .artwork-image {
-    max-width: 11.11cqi;
-    max-height: 11.11cqi;
+    max-width: 10.55cqi;
+    max-height: 10.55cqi;
 }
 
 .mockup-size-a3 .artwork-image {
-    max-width: 14.81cqi;
-    max-height: 14.81cqi;
+    max-width: 14.07cqi;
+    max-height: 14.07cqi;
 }
 
 .mockup-size-a2 .artwork-image {
-    max-width: 22.22cqi;
-    max-height: 22.22cqi;
+    max-width: 21.11cqi;
+    max-height: 21.11cqi;
 }
 
 .mockup-size-a1 .artwork-image {
-    max-width: 31.48cqi;
-    max-height: 31.48cqi;
+    max-width: 29.91cqi;
+    max-height: 29.91cqi;
 }
 
 /* Dynamic Frame System */
