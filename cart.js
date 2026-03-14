@@ -173,41 +173,70 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Build the WhatsApp message
             const phoneNumber = '5521999698170'; // User's actual WhatsApp number
-            
             let message = `*Novo Pedido - Victor Ribeiro Fotografia*\n\n`;
             message += `*Cliente:* ${customerDetails.name}\n`;
             message += `*Email:* ${customerDetails.email}\n`;
             message += `*Telefone:* ${customerDetails.phone}\n\n`;
+            message += `*🚨 POR FAVOR, ANEXE O RECIBO VISUAL (A IMAGEM QUE FOI BAIXADA AGORA) NESTA CONVERSA 🚨*\n\n`;
             
             message += `*Itens do Pedido:*\n`;
             
+            const sizeLabels = {
+                'a4': 'A4 (20x30cm)',
+                'a3': 'A3 (30x40cm)',
+                'a2': 'A2 (40x60cm)',
+                'a1': 'A1 (60x85cm)'
+            };
+
+            const frameLabels = {
+                'none': 'Sem Moldura',
+                'black': 'Moldura Preta',
+                'wood': 'Moldura Madeira',
+                'white': 'Moldura Branca'
+            };
+
+            const receiptItemsContainer = document.getElementById('receipt-items');
+            receiptItemsContainer.innerHTML = ''; // clear
+
             cart.forEach((item, index) => {
-                const sizeLabels = {
-                    'a4': 'A4 (20x30cm)',
-                    'a3': 'A3 (30x40cm)',
-                    'a2': 'A2 (40x60cm)',
-                    'a1': 'A1 (60x85cm)'
-                };
-    
-                const frameLabels = {
-                    'none': 'Sem Moldura',
-                    'black': 'Moldura Preta',
-                    'wood': 'Moldura Madeira',
-                    'white': 'Moldura Branca'
-                };
-                
+                // WhatsApp Message
                 message += `${index + 1}. ${item.title} (${sizeLabels[item.size] || item.size})\n`;
                 message += `   Estilo: ${frameLabels[item.frame] || item.frame}\n`;
-                if(item.passepartout) {
+                if (item.passepartout) {
                     message += `   Borda: Com Passepartout (5cm)\n`;
                 }
                 message += `   Preço: ${formatBRL(item.price)}\n\n`;
+
+                // HTML Receipt build
+                receiptItemsContainer.innerHTML += `
+                    <div style="display: flex; gap: 20px; align-items: center; border-bottom: 1px dotted #333; padding-bottom: 20px;">
+                        <img src="${item.img}" style="width: 100px; height: 100px; object-fit: contain; background: #111; padding: 5px; border: 1px solid #333;">
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0 0 5px 0; font-size: 16px;">${item.title}</h4>
+                            <p style="margin: 0; color: #888; font-size: 14px;">${sizeLabels[item.size] || item.size} | ${frameLabels[item.frame] || item.frame}</p>
+                            ${item.passepartout ? '<p style="margin: 0; color: #888; font-size: 14px;">+ Passepartout</p>' : ''}
+                        </div>
+                        <div style="font-size: 16px; font-weight: bold;">
+                            ${formatBRL(item.price)}
+                        </div>
+                    </div>
+                `;
             });
 
             const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
             
             message += `*Total Final:* ${formatBRL(subtotal)}\n\n`;
             
+            // Populate HTML receipt details
+            document.getElementById('receipt-total').textContent = formatBRL(subtotal);
+            document.getElementById('receipt-customer-name').textContent = customerDetails.name;
+            document.getElementById('receipt-customer-phone').textContent = customerDetails.phone;
+            
+            let htmlAddress = `CEP: ${customerDetails.cep}<br>${customerDetails.street}, ${customerDetails.number || 'S/N'}`;
+            if (customerDetails.complement) htmlAddress += `<br>${customerDetails.complement}`;
+            htmlAddress += `<br>${customerDetails.city} - ${customerDetails.state}`;
+            document.getElementById('receipt-customer-address').innerHTML = htmlAddress;
+
             message += `*Endereço de Entrega:*\n`;
             message += `CEP: ${customerDetails.cep}\n`;
             message += `${customerDetails.street}, ${customerDetails.number || 'S/N'}\n`;
@@ -219,8 +248,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
-            // Redirect user directly to WhatsApp
-            window.location.href = whatsappUrl;
+            // Generate Image using html2canvas
+            checkoutCompleteBtn.textContent = 'Gerando recibo visual...';
+            
+            const receiptEl = document.getElementById('receipt-container');
+            
+            html2canvas(receiptEl, {
+                scale: 2, // High resolution
+                backgroundColor: '#000000',
+                logging: false,
+                useCORS: true // Allow rendering images loaded from the same domain
+            }).then(canvas => {
+                // Create download link
+                const link = document.createElement('a');
+                link.download = `Recibo_VictorRibeiro_${customerDetails.name.replace(/\s+/g, '_')}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click(); // Trigger native download
+
+                // Redirect user to WhatsApp shortly after download triggers
+                checkoutCompleteBtn.textContent = 'Redirecionando...';
+                setTimeout(() => {
+                    window.location.href = whatsappUrl;
+                }, 1000); // 1s buffer for the browser to begin download
+                
+            }).catch(err => {
+                console.error('Error generating receipt image:', err);
+                // Fallback to WhatsApp redirect if image fails
+                window.location.href = whatsappUrl;
+            });
 
         } catch (error) {
             console.error('Checkout Error:', error);
