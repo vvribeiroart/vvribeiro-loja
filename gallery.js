@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 card.innerHTML = `
                     <div class="photo-img-wrapper">
-                        <img src="${photo.src}" alt="${photo.title}">
+                        <img src="${photo.src}" alt="${photo.title}" loading="lazy">
                     </div>
                     <div class="photo-info" style="display:none;">
                         <h3>${photo.title}</h3>
