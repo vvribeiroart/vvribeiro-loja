@@ -3,15 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyCartMessage = document.getElementById('emptyCartMessage');
     const cartContent = document.getElementById('cartContent');
     const subtotalDisplay = document.getElementById('subtotalDisplay');
-    const shippingDisplay = document.getElementById('shippingDisplay');
     const grandTotalDisplay = document.getElementById('grandTotalDisplay');
 
     const cepInput = document.getElementById('cepInput');
-    const calcShippingBtn = document.getElementById('calcShippingBtn');
-    const shippingMessage = document.getElementById('shippingMessage');
 
     let cart = JSON.parse(localStorage.getItem('vvribeiro_cart')) || [];
-    let currentShippingCost = 0;
 
     // Currency Formatter
     const formatBRL = (value) => {
@@ -85,11 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update Totals
         subtotalDisplay.textContent = formatBRL(subtotal);
-        updateGrandTotal(subtotal, currentShippingCost);
+        updateGrandTotal(subtotal);
     };
 
-    const updateGrandTotal = (sub, ship) => {
-        grandTotalDisplay.textContent = formatBRL(sub + ship);
+    const updateGrandTotal = (sub) => {
+        grandTotalDisplay.textContent = formatBRL(sub);
     };
 
     // Global expose for inline onclick handler
@@ -97,126 +93,45 @@ document.addEventListener('DOMContentLoaded', () => {
         cart.splice(index, 1);
         localStorage.setItem('vvribeiro_cart', JSON.stringify(cart));
 
-        // Reset shipping if cart is empty
         if (cart.length === 0) {
-            currentShippingCost = 0;
-            shippingDisplay.textContent = 'R$ 0,00';
-            shippingMessage.textContent = '';
             cepInput.value = '';
         }
 
         renderCart();
     };
 
-    // Shipping Calculator via ViaCEP
-    calcShippingBtn.addEventListener('click', async () => {
-        let cep = cepInput.value.replace(/\D/g, ''); // Remove non-digits
-
-        if (cep.length !== 8) {
-            shippingMessage.textContent = 'CEP inválido. Digite 8 números.';
-            shippingMessage.className = 'shipping-msg error';
-            return;
+    // Auto-fetch address when CEP completes
+    cepInput.addEventListener('input', async (e) => {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length > 5) {
+            val = val.replace(/^(\d{5})(\d)/, '$1-$2');
         }
+        e.target.value = val;
 
-        shippingMessage.textContent = 'Calculando...';
-        shippingMessage.className = 'shipping-msg';
-        calcShippingBtn.disabled = true;
+        let cep = val.replace(/\D/g, '');
+        
+        if (cep.length === 8) {
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
 
-        try {
-            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-            const data = await response.json();
-
-            if (data.erro) {
-                throw new Error('CEP não encontrado');
+                if (!data.erro) {
+                    document.getElementById('addrStreet').value = data.logradouro || '';
+                    document.getElementById('addrCity').value = data.localidade || '';
+                    document.getElementById('addrState').value = data.uf || '';
+                    // Set focus to the number input since street is filled
+                    if (data.logradouro) document.getElementById('addrNumber').focus();
+                }
+            } catch (error) {
+                console.error('Error fetching CEP:', error);
             }
-
-            // Mocked Freight Logic by State (UF) - Dispatching from Itu, SP
-            const uf = data.uf;
-            const localidade = data.localidade;
-            let cost = 0;
-            let locationName = `${localidade}, ${uf}`;
-
-            // Priority 1: Customer is in Itu, SP (Local delivery)
-            if (localidade === 'Itu' && uf === 'SP') {
-                cost = 15; // Extremely cheap local courier
-            }
-            // Priority 2: Customer is elsewhere in the state of São Paulo
-            else if (uf === 'SP') {
-                cost = 25; // Standard SP flat rate
-            }
-            // Priority 3: Neighboring states (Sudeste + PR)
-            else if (['RJ', 'MG', 'PR'].includes(uf)) {
-                cost = 45;
-            }
-            // Priority 4: Extended South/MidWest/ES
-            else if (['ES', 'SC', 'RS', 'MS', 'GO', 'DF'].includes(uf)) {
-                cost = 65;
-            }
-            // Priority 5: Far regions (Norte, Nordeste, MT)
-            else {
-                cost = 95;
-            }
-
-            // Add base cost + R$10 per extra item due to weight/volume packed
-            if (cart.length > 1) {
-                cost += (cart.length - 1) * 15;
-            }
-
-            currentShippingCost = cost;
-            shippingDisplay.textContent = formatBRL(currentShippingCost);
-            shippingMessage.textContent = `Frete (Correios) para ${locationName}`;
-            shippingMessage.className = 'shipping-msg';
-
-            // Trigger recalculation of total
-            const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
-            updateGrandTotal(subtotal, currentShippingCost);
-
-            // Auto-fill address fields from ViaCEP
-            if (!data.erro) {
-                document.getElementById('addrStreet').value = data.logradouro || '';
-                document.getElementById('addrCity').value = data.localidade || '';
-                document.getElementById('addrState').value = data.uf || '';
-                // Set focus to the number input since street is filled
-                if(data.logradouro) document.getElementById('addrNumber').focus();
-            }
-
-            // Activate the checkout button now that shipping is verified
-            const checkoutCompleteBtn = document.getElementById('checkoutCompleteBtn');
-            checkoutCompleteBtn.disabled = false;
-            checkoutCompleteBtn.style.opacity = '1';
-            checkoutCompleteBtn.style.cursor = 'pointer';
-
-        } catch (error) {
-            shippingMessage.textContent = 'Não foi possível calcular o frete para este CEP.';
-            shippingMessage.className = 'shipping-msg error';
-            currentShippingCost = 0;
-            shippingDisplay.textContent = 'R$ 0,00';
-            const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
-            updateGrandTotal(subtotal, currentShippingCost);
-        } finally {
-            calcShippingBtn.disabled = false;
         }
     });
 
     // Initial render
     renderCart();
 
-    // CEP input formatter mask
-    cepInput.addEventListener('input', function (e) {
-        let val = e.target.value.replace(/\D/g, '');
-        if (val.length > 5) {
-            val = val.replace(/^(\d{5})(\d)/, '$1-$2');
-        }
-        e.target.value = val;
-    });
-
-    // Enhanced Mercado Pago / Serverless Checkout Redirect
     const checkoutCompleteBtn = document.getElementById('checkoutCompleteBtn');
-
-    // Lock checkout initially until shipping calculates
-    checkoutCompleteBtn.disabled = true;
-    checkoutCompleteBtn.style.opacity = '0.5';
-    checkoutCompleteBtn.style.cursor = 'not-allowed';
 
     checkoutCompleteBtn.addEventListener('click', async () => {
         if (cart.length === 0) return;
@@ -280,9 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
             
-            message += `*Subtotal:* ${formatBRL(subtotal)}\n`;
-            message += `*Frete:* ${formatBRL(currentShippingCost)}\n`;
-            message += `*Total Final:* ${formatBRL(subtotal + currentShippingCost)}\n\n`;
+            message += `*Total Final:* ${formatBRL(subtotal)}\n\n`;
             
             message += `*Endereço de Entrega:*\n`;
             message += `CEP: ${customerDetails.cep}\n`;

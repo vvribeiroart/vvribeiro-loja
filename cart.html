@@ -60,24 +60,7 @@
                     <span id="subtotalDisplay">R$ 0,00</span>
                 </div>
 
-                <div class="shipping-calculator">
-                    <label for="cepInput">Calcular Frete</label>
-                    <div class="cep-group">
-                        <input type="text" id="cepInput" placeholder="CEP (Ex: 01001-000)" maxlength="9">
-                        <button id="calcShippingBtn" class="btn-checkout"
-                            style="padding: 0.8rem; width: auto; font-size: 0.9rem;">Calcular</button>
-                    </div>
-                    <p id="shippingMessage" class="shipping-msg"></p>
-                </div>
-
-                <div class="summary-line shipping-line">
-                    <span>Frete</span>
-                    <span id="shippingDisplay">R$ 0,00</span>
-                </div>
-
-                <hr class="summary-divider">
-
-                <div class="summary-line total-line">
+                <div class="summary-line total-line" style="margin-top: 1rem;">
                     <span>Total</span>
                     <span id="grandTotalDisplay">R$ 0,00</span>
                 </div>
@@ -87,6 +70,7 @@
                     <input type="text" id="customerName" placeholder="Nome Completo" required class="form-input">
                     <input type="email" id="customerEmail" placeholder="E-mail" required class="form-input">
                     <input type="tel" id="customerPhone" placeholder="WhatsApp (com DDD)" required class="form-input">
+                    <input type="text" id="cepInput" placeholder="CEP (Ex: 01001-000)" maxlength="9" required class="form-input">
                     
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.8rem;">
                         <input type="text" id="addrStreet" placeholder="Rua / Avenida" required class="form-input">
