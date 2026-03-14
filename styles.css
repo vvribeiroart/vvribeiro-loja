@@ -987,33 +987,6 @@ input:disabled+.slider {
     opacity: 0.8;
 }
 
-.new-header .auth-links {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
-
-.new-header .auth-link {
-    color: var(--text-secondary);
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: color 0.3s;
-}
-
-.new-header .auth-link:hover {
-    color: var(--text-primary);
-}
-
-.new-header .auth-greeting {
-    color: var(--accent);
-}
-
-.new-header .auth-separator {
-    color: var(--border);
-}
 
 .absolute-cart {
     position: absolute;

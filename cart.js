@@ -171,6 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
             updateGrandTotal(subtotal, currentShippingCost);
 
+            // Auto-fill address fields from ViaCEP
+            if (!data.erro) {
+                document.getElementById('addrStreet').value = data.logradouro || '';
+                document.getElementById('addrCity').value = data.localidade || '';
+                document.getElementById('addrState').value = data.uf || '';
+                // Set focus to the number input since street is filled
+                if(data.logradouro) document.getElementById('addrNumber').focus();
+            }
+
             // Activate the checkout button now that shipping is verified
             const checkoutCompleteBtn = document.getElementById('checkoutCompleteBtn');
             checkoutCompleteBtn.disabled = false;
@@ -192,23 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial render
     renderCart();
 
-    // Auto-calculate shipping for returning registered users securely via Supabase Auth Network
-    window.supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session && cart.length > 0) {
-            try {
-                // Address data was embedded in the Postgres raw_user_meta_data blob during registry
-                const userParams = session.user.user_metadata;
-                if (userParams && userParams.cep) {
-                    cepInput.value = userParams.cep;
-                    // Programmatically execute the freight fetch
-                    calcShippingBtn.click();
-                }
-            } catch (e) {
-                console.error('Failed to restore user shipping data from network', e);
-            }
-        }
-    });
-
     // CEP input formatter mask
     cepInput.addEventListener('input', function (e) {
         let val = e.target.value.replace(/\D/g, '');
@@ -229,54 +221,86 @@ document.addEventListener('DOMContentLoaded', () => {
     checkoutCompleteBtn.addEventListener('click', async () => {
         if (cart.length === 0) return;
 
-        // CHECK LOGIN STATE securely via the cloud
-        const { data: { session } } = await window.supabase.auth.getSession();
-
-        if (!session) {
-            // User is anonymous or token expired, force them to re-authenticate
-            window.location.href = 'login.html';
+        // Extract customer payload from the form
+        const customerDetails = {
+            name: document.getElementById('customerName').value.trim(),
+            email: document.getElementById('customerEmail').value.trim(),
+            phone: document.getElementById('customerPhone').value.trim(),
+            cep: cepInput.value.replace(/\D/g, ''),
+            street: document.getElementById('addrStreet').value.trim(),
+            number: document.getElementById('addrNumber').value.trim(),
+            complement: document.getElementById('addrComplement').value.trim(),
+            city: document.getElementById('addrCity').value.trim(),
+            state: document.getElementById('addrState').value.trim()
+        };
+        
+        // Basic validation
+        if(!customerDetails.name || !customerDetails.phone || !customerDetails.street || !customerDetails.number || !customerDetails.cep) {
+            alert('Por favor, preencha todos os campos obrigatórios de entrega (Nome, Telefone e Endereço).');
             return;
         }
 
-        // Extract shipping payload safely from the decoded JWT metadata
-        const customerDetails = session.user.user_metadata;
-        customerDetails.email = session.user.email; // Append email since it lives one level up on the object
-
         checkoutCompleteBtn.disabled = true;
         const originalText = checkoutCompleteBtn.textContent;
-        checkoutCompleteBtn.textContent = 'Gerando Pagamento...';
+        checkoutCompleteBtn.textContent = 'Redirecionando para o WhatsApp...';
 
         try {
-            // Send the cart data AND cached customer payload to our secure Vercel Serverless Function
-            const response = await fetch('/api/checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    cartItems: cart,
-                    shippingCost: currentShippingCost,
-                    customer: customerDetails,
-                    baseURL: window.location.origin
-                })
+            // Build the WhatsApp message
+            const phoneNumber = '5511999999999'; // Replace with the actual WhatsApp number
+            
+            let message = `*Novo Pedido - lemmeknow*\n\n`;
+            message += `*Cliente:* ${customerDetails.name}\n`;
+            message += `*Email:* ${customerDetails.email}\n`;
+            message += `*Telefone:* ${customerDetails.phone}\n\n`;
+            
+            message += `*Itens do Pedido:*\n`;
+            
+            cart.forEach((item, index) => {
+                const sizeLabels = {
+                    'a4': 'A4 (20x30cm)',
+                    'a3': 'A3 (30x40cm)',
+                    'a2': 'A2 (40x60cm)',
+                    'a1': 'A1 (60x85cm)'
+                };
+    
+                const frameLabels = {
+                    'none': 'Sem Moldura',
+                    'black': 'Moldura Preta',
+                    'wood': 'Moldura Madeira',
+                    'white': 'Moldura Branca'
+                };
+                
+                message += `${index + 1}. ${item.title} (${sizeLabels[item.size] || item.size})\n`;
+                message += `   Estilo: ${frameLabels[item.frame] || item.frame}\n`;
+                if(item.passepartout) {
+                    message += `   Borda: Com Passepartout (5cm)\n`;
+                }
+                message += `   Preço: ${formatBRL(item.price)}\n\n`;
             });
 
-            if (!response.ok) {
-                throw new Error('Falha ao comunicar com o servidor de pagamento.');
+            const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
+            
+            message += `*Subtotal:* ${formatBRL(subtotal)}\n`;
+            message += `*Frete:* ${formatBRL(currentShippingCost)}\n`;
+            message += `*Total Final:* ${formatBRL(subtotal + currentShippingCost)}\n\n`;
+            
+            message += `*Endereço de Entrega:*\n`;
+            message += `CEP: ${customerDetails.cep}\n`;
+            message += `${customerDetails.street}, ${customerDetails.number || 'S/N'}\n`;
+            if (customerDetails.complement) {
+                message += `${customerDetails.complement}\n`;
             }
+            message += `${customerDetails.city} - ${customerDetails.state}\n`;
 
-            const data = await response.json();
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
-            // Redirect user directly to the securely generated Mercado Pago checkout screen
-            if (data.init_point) {
-                window.location.href = data.init_point;
-            } else {
-                throw new Error('URL de pagamento não gerada.');
-            }
+            // Redirect user directly to WhatsApp
+            window.location.href = whatsappUrl;
 
         } catch (error) {
             console.error('Checkout Error:', error);
-            alert('Houve um problema ao iniciar o pagamento. Por favor, tente novamente ou contate nossa equipe.');
+            alert('Houve um problema ao processar o pedido. Por favor, tente novamente ou contate nossa equipe.');
             checkoutCompleteBtn.disabled = false;
             checkoutCompleteBtn.textContent = originalText;
         }
