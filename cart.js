@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Build the WhatsApp message
-            const phoneNumber = '5511999999999'; // Replace with the actual WhatsApp number
+            const phoneNumber = '5521999698170'; // User's actual WhatsApp number
             
             let message = `*Novo Pedido - lemmeknow*\n\n`;
             message += `*Cliente:* ${customerDetails.name}\n`;
